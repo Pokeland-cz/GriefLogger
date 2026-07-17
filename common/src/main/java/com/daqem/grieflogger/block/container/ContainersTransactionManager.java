@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,14 @@ public class ContainersTransactionManager implements IContainerTransactionManage
         for (BaseContainerBlockEntity blockEntity : blockEntities) {
             initialItems.put(blockEntity, new ArrayList<>());
             finalItems.put(blockEntity, new ArrayList<>());
+
+            // Bypass if the container has an unpacked loot table
+            if (blockEntity instanceof RandomizableContainerBlockEntity lootableContainer) {
+                if (lootableContainer.getLootTable() != null) {
+                    continue;
+                }
+            }
+
             for (int i = 0; i < blockEntity.getContainerSize(); i++) {
                 addItem(blockEntity.getItem(i), initialItems.get(blockEntity));
             }
@@ -52,6 +61,13 @@ public class ContainersTransactionManager implements IContainerTransactionManage
     }
 
     private void constructFinalItems(BaseContainerBlockEntity blockEntity) {
+        // Bypass if the container has an unpacked loot table
+        if (blockEntity instanceof RandomizableContainerBlockEntity lootableContainer) {
+            if (lootableContainer.getLootTable() != null) {
+                return;
+            }
+        }
+
         for (int i = 0; i < blockEntity.getContainerSize(); i++) {
             addItem(blockEntity.getItem(i), finalItems.get(blockEntity));
         }

@@ -3,6 +3,7 @@ package com.daqem.grieflogger.block.container;
 import com.daqem.grieflogger.database.service.Services;
 import com.daqem.grieflogger.model.SimpleItemStack;
 import com.daqem.grieflogger.model.action.ItemAction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -43,6 +44,12 @@ public class ContainerTransactionManager implements IContainerTransactionManager
     }
 
     private void constructFinalItems() {
+        // Explicitly bypass Lootr block entities to prevent recursive crashes
+        String namespace = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType()).getNamespace();
+        if ("lootr".equals(namespace)) {
+            return;
+        }
+
         for (int i = 0; i < blockEntity.getContainerSize(); i++) {
             addItem(blockEntity.getItem(i), finalItems);
         }
