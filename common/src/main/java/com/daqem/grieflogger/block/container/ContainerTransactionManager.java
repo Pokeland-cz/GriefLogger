@@ -3,11 +3,11 @@ package com.daqem.grieflogger.block.container;
 import com.daqem.grieflogger.database.service.Services;
 import com.daqem.grieflogger.model.SimpleItemStack;
 import com.daqem.grieflogger.model.action.ItemAction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,14 @@ public class ContainerTransactionManager implements IContainerTransactionManager
 
     public ContainerTransactionManager(BaseContainerBlockEntity blockEntity) {
         this.blockEntity = blockEntity;
+
+        // Bypass if the container has an unpacked loot table
+        if (blockEntity instanceof RandomizableContainerBlockEntity lootableContainer) {
+            if (lootableContainer.getLootTable() != null) {
+                return;
+            }
+        }
+
         for (int i = 0; i < blockEntity.getContainerSize(); i++) {
             addItem(blockEntity.getItem(i), initialItems);
         }
@@ -44,10 +52,11 @@ public class ContainerTransactionManager implements IContainerTransactionManager
     }
 
     private void constructFinalItems() {
-        // Explicitly bypass Lootr block entities to prevent recursive crashes
-        String namespace = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType()).getNamespace();
-        if ("lootr".equals(namespace)) {
-            return;
+        // Bypass if the container has an unpacked loot table
+        if (blockEntity instanceof RandomizableContainerBlockEntity lootableContainer) {
+            if (lootableContainer.getLootTable() != null) {
+                return;
+            }
         }
 
         for (int i = 0; i < blockEntity.getContainerSize(); i++) {

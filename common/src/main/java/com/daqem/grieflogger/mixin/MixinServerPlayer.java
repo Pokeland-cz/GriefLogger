@@ -106,9 +106,10 @@ public abstract class MixinServerPlayer extends Player implements GriefLoggerSer
     @Inject(at = @At("HEAD"), method = "doCloseContainer()V")
     public void grieflogger$doCloseContainer(CallbackInfo ci) {
         EnvExecutor.getInEnv(EnvType.SERVER, () -> () -> {
-            if (this.grieflogger$containerTransactionManager != null) {
-                this.grieflogger$containerTransactionManager.finalize(grieflogger$asServerPlayer());
+            IContainerTransactionManager manager = this.grieflogger$containerTransactionManager;
+            if (manager != null) {
                 this.grieflogger$containerTransactionManager = null;
+                manager.finalize(grieflogger$asServerPlayer());
             }
             return null;
         });
